@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>鍵盤音程練習：全音與半音</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #0b0f19;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        .game-card {
+            width: 100%;
+            max-width: 1080px;
+            background: #101625;
+            border-radius: 20px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border: 1px solid #1e293b;
+        }
+
+        /* 1. 頂部標題區 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #172033;
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: 1px solid #23314d;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .icon-box {
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, #6366f1, #3b82f6);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .title-text h1 {
+            font-size: 1.35rem;
+            color: #38bdf8;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .title-text p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .badge-box {
+            background: #0d1322;
+            padding: 6px 14px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #1e293b;
+            min-width: 68px;
+        }
+
+        .badge-label {
+            font-size: 0.65rem;
+            color: #64748b;
+            font-weight: 700;
+        }
+
+        .badge-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+
+        .btn-toggle {
+            background: #4f46e5;
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        /* 2. 中間控制區 (左右分欄) */
+        .middle-section {
+            display: grid;
+            grid-template-columns: 1fr 1.25fr;
+            gap: 16px;
+            align-items: stretch;
+        }
+
+        /* 左側拉霸區 */
+        .slot-container {
+            background: #172033;
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid #23314d;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .slot-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slot-tag {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .slot-box {
+            width: 100%;
+            height: 68px;
+            background: #0b0f19;
+            border-radius: 10px;
+            border: 2px solid #2d3d5e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #38bdf8;
+            box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        /* 右側按鈕與進度區 */
+        .control-panel {
+            background: #172033;
+            border-radius: 14px;
+            padding: 14px;
+            border: 1px solid #23314d;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .row-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-spin {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #ffffff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.95rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .progress-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .progress-label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 700;
+        }
+
+        .pill-container {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pill {
+            min-width: 40px;
+            height: 32px;
+            padding: 0 8px;
+            background: #0284c7;
+            color: #ffffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.4);
+        }
+
+        .pill.empty {
+            background: #0d1322;
+            color: #475569;
+            border: 1px solid #1e293b;
+            box-shadow: none;
+        }
+
+        .row-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .status-badge {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #38bdf8;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-clear {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* 3. 鋼琴鍵盤區 */
+        .keyboard-wrapper {
+            background: #172033;
+            border-radius: 16px;
+            padding: 16px 12px 12px 12px;
+            border: 1px solid #23314d;
+            overflow-x: auto;
+        }
+
+        .keyboard {
+            position: relative;
+            display: flex;
+            height: 200px;
+            width: 100%;
+            min-width: 700px;
+            margin: 0 auto;
+        }
+
+        .white-key {
+            flex: 1;
+            background: linear-gradient(to bottom, #f8fafc 0%, #e2e8f0 100%);
+            border: 1px solid #cbd5e1;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            position: relative;
+            z-index: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 12px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: #1e293b;
+            box-shadow: inset 0 -6px 12px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .white-key:active, .white-key.active {
+            background: #cbd5e1;
+            transform: translateY(2px);
+            box-shadow: inset 0 -2px 4px rgba(0,0,0,0.15);
+        }
+
+        .black-key {
+            position: absolute;
+            width: 5.2%;
+            height: 60%;
+            background: linear-gradient(to bottom, #334155 0%, #0f172a 100%);
+            border-radius: 0 0 6px 6px;
+            z-index: 2;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 8px;
+            font-size: 0.7rem;
+            line-height: 1.15;
+            color: #38bdf8;
+            font-weight: 800;
+            text-align: center;
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.6);
+        }
+
+        .black-key:active, .black-key.active {
+            background: #1e293b;
+            transform: translateY(2px);
+            box-shadow: 1px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* G5 右上角半個裝飾黑鍵 */
+        .dummy-key {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 2.6%;
+            height: 60%;
+            background: linear-gradient(to bottom, #334155 0%, #0f172a 100%);
+            border-radius: 0 0 0 6px;
+            z-index: 2;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        sup {
+            font-size: 0.55em;
+            vertical-align: super;
+        }
+
+        .hide-notes .key-text {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .middle-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card" id="gameCard">
+    <!-- 1. 上方標題區 -->
+    <div class="header">
+        <div class="title-group">
+            <div class="icon-box">🎵</div>
+            <div class="title-text">
+                <h1>鍵盤音程練習：全音與半音</h1>
+                <p>全全半全全全半老師你在念經喔?</p>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="badge-box">
+                <div class="badge-label">SCORE</div>
+                <div class="badge-value" id="score">0</div>
+            </div>
+            <div class="badge-box">
+                <div class="badge-label">COMBO</div>
+                <div class="badge-value" id="combo">0</div>
+            </div>
+            <button class="btn-toggle" id="toggleBtn" onclick="toggleNotes()">隱藏音名</button>
+        </div>
+    </div>
+
+    <!-- 2. 中間對齊區 (拉霸與控制項) -->
+    <div class="middle-section">
+        <!-- 左邊：拉霸機 -->
+        <div class="slot-container">
+            <div class="slot-grid">
+                <div class="slot-item">
+                    <span class="slot-tag">第 1 音</span>
+                    <div class="slot-box" id="s1">-</div>
+                </div>
+                <div class="slot-item">
+                    <span class="slot-tag">第 2 音</span>
+                    <div class="slot-box" id="s2">-</div>
+                </div>
+                <div class="slot-item">
+                    <span class="slot-tag">第 3 音</span>
+                    <div class="slot-box" id="s3">-</div>
+                </div>
+                <div class="slot-item">
+                    <span class="slot-tag">第 4 音</span>
+                    <div class="slot-box" id="s4">-</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右邊：按鈕與進度 -->
+        <div class="control-panel">
+            <div class="row-top">
+                <button class="btn-spin" onclick="spinSlot()">🔄 點我出題</button>
+                <button class="btn-demo" onclick="playDemo()">🔊 點我聽聽看</button>
+
+                <div class="progress-group">
+                    <span class="progress-label">彈奏進度：</span>
+                    <div class="pill-container">
+                        <div class="pill empty" id="p1">-</div>
+                        <div class="pill empty" id="p2">-</div>
+                        <div class="pill empty" id="p3">-</div>
+                        <div class="pill empty" id="p4">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row-bottom">
+                <div class="status-badge" id="statusText">請先點選「點我出題」</div>
+                <button class="btn-clear" onclick="clearInput()">↺ 清除重新輸入</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 下方鋼琴區 -->
+    <div class="keyboard-wrapper">
+        <div class="keyboard" id="keyboard">
+            <!-- 靜態與動態雙重保障 -->
+        </div>
+    </div>
+</div>
+
+<script>
+    const WHITE_KEYS = [
+        { name: 'C4', label: 'C<sup>4</sup>', freq: 261.63 },
+        { name: 'D4', label: 'D<sup>4</sup>', freq: 293.66 },
+        { name: 'E4', label: 'E<sup>4</sup>', freq: 329.63 },
+        { name: 'F4', label: 'F<sup>4</sup>', freq: 349.23 },
+        { name: 'G4', label: 'G<sup>4</sup>', freq: 392.00 },
+        { name: 'A4', label: 'A<sup>4</sup>', freq: 440.00 },
+        { name: 'B4', label: 'B<sup>4</sup>', freq: 493.88 },
+        { name: 'C5', label: 'C<sup>5</sup>', freq: 523.25 },
+        { name: 'D5', label: 'D<sup>5</sup>', freq: 587.33 },
+        { name: 'E5', label: 'E<sup>5</sup>', freq: 659.25 },
+        { name: 'F5', label: 'F<sup>5</sup>', freq: 698.46 },
+        { name: 'G5', label: 'G<sup>5</sup>', freq: 783.99 }
+    ];
+
+    const BLACK_KEYS = [
+        { name: 'C#4', label: 'C<sup>♯4</sup><br>D<sup>♭4</sup>', freq: 277.18, stepIndex: 1 },
+        { name: 'D#4', label: 'D<sup>♯4</sup><br>E<sup>♭4</sup>', freq: 311.13, stepIndex: 2 },
+        { name: 'F#4', label: 'F<sup>♯4</sup><br>G<sup>♭4</sup>', freq: 369.99, stepIndex: 4 },
+        { name: 'G#4', label: 'G<sup>♯4</sup><br>A<sup>♭4</sup>', freq: 415.30, stepIndex: 5 },
+        { name: 'A#4', label: 'A<sup>♯4</sup><br>B<sup>♭4</sup>', freq: 466.16, stepIndex: 6 },
+        { name: 'C#5', label: 'C<sup>♯5</sup><br>D<sup>♭5</sup>', freq: 554.37, stepIndex: 8 },
+        { name: 'D#5', label: 'D<sup>♯5</sup><br>E<sup>♭5</sup>', freq: 622.25, stepIndex: 9 },
+        { name: 'F#5', label: 'F<sup>♯5</sup><br>G<sup>♭5</sup>', freq: 739.99, stepIndex: 11 }
+    ];
+
+    const ALL_NOTES = [
+        { name: 'C4', freq: 261.63, display: 'C4' },
+        { name: 'C#4', freq: 277.18, display: 'C♯4' },
+        { name: 'D4', freq: 293.66, display: 'D4' },
+        { name: 'D#4', freq: 311.13, display: 'D♯4' },
+        { name: 'E4', freq: 329.63, display: 'E4' },
+        { name: 'F4', freq: 349.23, display: 'F4' },
+        { name: 'F#4', freq: 369.99, display: 'F♯4' },
+        { name: 'G4', freq: 392.00, display: 'G4' },
+        { name: 'G#4', freq: 415.30, display: 'G♯4' },
+        { name: 'A4', freq: 440.00, display: 'A4' },
+        { name: 'A#4', freq: 466.16, display: 'A♯4' },
+        { name: 'B4', freq: 493.88, display: 'B4' },
+        { name: 'C5', freq: 523.25, display: 'C5' },
+        { name: 'C#5', freq: 554.37, display: 'C♯5' },
+        { name: 'D5', freq: 587.33, display: 'D5' },
+        { name: 'D#5', freq: 622.25, display: 'D♯5' },
+        { name: 'E5', freq: 659.25, display: 'E5' },
+        { name: 'F5', freq: 698.46, display: 'F5' },
+        { name: 'F#5', freq: 739.99, display: 'F♯5' },
+        { name: 'G5', freq: 783.99, display: 'G5' }
+    ];
+
+    const ROOT_LIST = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+    const STEP_LIST = ['全', '半'];
+
+    let audioCtx = null;
+    let targetNotes = [];
+    let userInput = [];
+    let score = 0;
+    let combo = 0;
+    let showLabels = true;
+    let isSpinning = false;
+
+    function playTone(freq, duration = 0.4) {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function initKeyboard() {
+        const kb = document.getElementById('keyboard');
+        if (!kb) return;
+        kb.innerHTML = '';
+
+        WHITE_KEYS.forEach(w => {
+            const el = document.createElement('div');
+            el.className = 'white-key';
+            el.dataset.name = w.name;
+            el.innerHTML = `<span class="key-text">${w.label}</span>`;
+            el.onpointerdown = (e) => {
+                e.preventDefault();
+                handleNotePress(w.name, w.freq, el);
+            };
+            kb.appendChild(el);
+        });
+
+        const unitWidth = 100 / 12;
+        BLACK_KEYS.forEach(b => {
+            const el = document.createElement('div');
+            el.className = 'black-key';
+            el.dataset.name = b.name;
+            el.style.left = `calc(${b.stepIndex * unitWidth}% - 2.6%)`;
+            el.innerHTML = `<span class="key-text">${b.label}</span>`;
+            el.onpointerdown = (e) => {
+                e.preventDefault();
+                handleNotePress(b.name, b.freq, el);
+            };
+            kb.appendChild(el);
+        });
+
+        const dummy = document.createElement('div');
+        dummy.className = 'dummy-key';
+        kb.appendChild(dummy);
+    }
+
+    function handleNotePress(name, freq, el) {
+        playTone(freq);
+        el.classList.add('active');
+        setTimeout(() => el.classList.remove('active'), 200);
+
+        if (targetNotes.length === 0 || userInput.length >= 4) return;
+
+        userInput.push(name);
+        updateProgressUI();
+
+        if (userInput.length === 4) {
+            checkAnswer();
+        }
+    }
+
+    function updateProgressUI() {
+        for (let i = 1; i <= 4; i++) {
+            const pill = document.getElementById(`p${i}`);
+            if (userInput[i - 1]) {
+                const noteObj = ALL_NOTES.find(n => n.name === userInput[i - 1]);
+                pill.innerText = noteObj ? noteObj.display : '♪';
+                pill.classList.remove('empty');
+            } else {
+                pill.innerText = '-';
+                pill.classList.add('empty');
+            }
+        }
+    }
+
+    function spinSlot() {
+        if (isSpinning) return;
+        isSpinning = true;
+
+        const r = ROOT_LIST[Math.floor(Math.random() * ROOT_LIST.length)];
+        const s1 = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+        const s2 = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+        const s3 = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+
+        let count = 0;
+        const timer = setInterval(() => {
+            document.getElementById('s1').innerText = ROOT_LIST[Math.floor(Math.random() * ROOT_LIST.length)];
+            document.getElementById('s2').innerText = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+            document.getElementById('s3').innerText = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+            document.getElementById('s4').innerText = STEP_LIST[Math.floor(Math.random() * STEP_LIST.length)];
+            count++;
+
+            if (count > 8) {
+                clearInterval(timer);
+                document.getElementById('s1').innerText = r;
+                document.getElementById('s2').innerText = s1;
+                document.getElementById('s3').innerText = s2;
+                document.getElementById('s4').innerText = s3;
+
+                calcAnswer(r, s1, s2, s3);
+                clearInput();
+                document.getElementById('statusText').innerText = "請在鍵盤上按順序彈奏 4 個音";
+                document.getElementById('statusText').style.color = "#38bdf8";
+                isSpinning = false;
+            }
+        }, 70);
+    }
+
+    function calcAnswer(r, s1, s2, s3) {
+        let rootIdx = ALL_NOTES.findIndex(n => n.name.startsWith(r));
+        if (rootIdx === -1) rootIdx = 0;
+
+        const idx1 = rootIdx;
+        const idx2 = idx1 + (s1 === '全' ? 2 : 1);
+        const idx3 = idx2 + (s2 === '全' ? 2 : 1);
+        const idx4 = idx3 + (s3 === '全' ? 2 : 1);
+
+        targetNotes = [
+            ALL_NOTES[idx1] ? ALL_NOTES[idx1].name : 'C4',
+            ALL_NOTES[idx2] ? ALL_NOTES[idx2].name : 'C4',
+            ALL_NOTES[idx3] ? ALL_NOTES[idx3].name : 'C4',
+            ALL_NOTES[idx4] ? ALL_NOTES[idx4].name : 'C4'
+        ];
+    }
+
+    function checkAnswer() {
+        const isRight = userInput.every((val, idx) => val === targetNotes[idx]);
+
+        if (isRight) {
+            score += 100 + combo * 20;
+            combo++;
+            document.getElementById('score').innerText = score;
+            document.getElementById('combo').innerText = combo;
+            document.getElementById('statusText').innerText = "🎉 完全正確！太棒了！";
+            document.getElementById('statusText').style.color = "#4ade80";
+        } else {
+            combo = 0;
+            document.getElementById('combo').innerText = combo;
+            document.getElementById('statusText').innerText = "❌ 答錯囉！請再試一次";
+            document.getElementById('statusText').style.color = "#f87171";
+            setTimeout(() => clearInput(), 1000);
+        }
+    }
+
+    function clearInput() {
+        userInput = [];
+        updateProgressUI();
+        if (targetNotes.length > 0) {
+            document.getElementById('statusText').innerText = "請在鍵盤上按順序彈奏 4 個音";
+            document.getElementById('statusText').style.color = "#38bdf8";
+        }
+    }
+
+    function playDemo() {
+        if (targetNotes.length === 0) return;
+        targetNotes.forEach((name, i) => {
+            const noteObj = ALL_NOTES.find(n => n.name === name);
+            if (noteObj) {
+                setTimeout(() => {
+                    playTone(noteObj.freq, 0.4);
+                    const el = document.querySelector(`[data-name="${name}"]`);
+                    if (el) {
+                        el.classList.add('active');
+                        setTimeout(() => el.classList.remove('active'), 300);
+                    }
+                }, i * 450);
+            }
+        });
+    }
+
+    function toggleNotes() {
+        showLabels = !showLabels;
+        const card = document.getElementById('gameCard');
+        const btn = document.getElementById('toggleBtn');
+        if (showLabels) {
+            card.classList.remove('hide-notes');
+            btn.innerText = '隱藏音名';
+        } else {
+            card.classList.add('hide-notes');
+            btn.innerText = '顯示音名';
+        }
+    }
+
+    // 立即初始化
+    initKeyboard();
+</script>
+</body>
+</html>
